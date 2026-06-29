@@ -19,6 +19,7 @@ class Network:
         self.neurons.append(neuron[1:])
 
     def add_synapse(self, synapse):
+        # (presynaptic, postsynaptic, weight)
         synapse = list(synapse)
         for i in range(2):
             if isinstance(synapse[i], str):
@@ -52,3 +53,6 @@ class Network:
         self.x = np.concatenate([self.x, fires[np.newaxis, :]], axis=0)
 
         return fires[self.num_inputs:self.num_inputs + self.num_outputs]
+
+    def __call__(self, *args, **kwargs):
+        return self.step(*args, **kwargs)
