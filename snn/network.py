@@ -31,6 +31,8 @@ class Network:
                     raise ValueError("Neuron name '" + synapse[i] + "' not found.")
                 synapse[i] = self.names.index(synapse[i])
         # (presynaptic, postsynaptic, weight, delay=1)
+        if len(synapse) == 3:
+            synapse.append(1)
         self.synapses.append(tuple(synapse))
 
     def setup_network(self):
