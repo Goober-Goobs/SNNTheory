@@ -54,5 +54,5 @@ class Pattern_Matcher(Network):
         return self.step(*args, **kwargs)
 
 matcher = Pattern_Matcher("101")
-print(matcher.step([0, 0, 1]))
-print(matcher.step())
+print(matcher([0, 0, 1]))
+print(matcher())

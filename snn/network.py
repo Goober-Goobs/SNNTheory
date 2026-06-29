@@ -11,8 +11,10 @@ class Network:
         self.decay = None
         self.index = None
         self.voltage = None
-        self.synapse_mat = None
-        self.delay = None
+        self.pre = None
+        self.post = None
+        self.weights = None
+        self.delays = None
         self.x = None
 
     def add_neuron(self, neuron):
@@ -38,15 +40,11 @@ class Network:
         self.decay = np.array(decay).astype(np.float64)
         self.voltage = np.zeros_like(threshold).astype(np.float64)
 
-        self.synapse_mat = np.zeros((n, n))
-        self.delay = np.ones((n, n), dtype=np.int8)
-        for synapse in self.synapses:
-            self.synapse_mat[synapse[0], synapse[1]] = synapse[2]
-            if len(synapse) > 3:
-                self.delay[synapse[0], synapse[1]] = synapse[3]
-            else:
-                self.delay[synapse[0], synapse[1]] = 1
-        self.synapse_mat = self.synapse_mat.astype(np.float64)
+        pre, post, weights, delays = zip(*self.synapses)
+        self.pre = np.array(pre)
+        self.post = np.array(post)
+        self.weights = np.array(weights)
+        self.delays = np.array(delays)
         self.x = np.zeros((1, n)).astype(bool)
 
     def step(self, inputs=None):
@@ -55,9 +53,9 @@ class Network:
             self.x[-1][:self.num_inputs] = np.array(inputs)
 
         self.voltage *= self.decay
-        pos_delay = np.maximum(self.x.shape[0] - self.delay, 0)
-        index = np.repeat(np.arange(n, dtype=np.int32)[:, np.newaxis], n, axis=1)
-        self.voltage += np.sum((self.synapse_mat * self.x[pos_delay, index]), axis=0)
+        pos_delay = np.maximum(self.x.shape[0] - self.delays, 0)
+
+        np.add.at(self.voltage, self.post, self.x[pos_delay, self.pre] * self.weights)
         fires = (self.voltage >= self.threshold)
         self.voltage[fires] = 0
         self.x = np.concatenate([self.x, fires[np.newaxis, :]], axis=0)
